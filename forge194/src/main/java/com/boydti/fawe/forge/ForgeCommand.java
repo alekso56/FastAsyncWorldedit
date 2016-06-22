@@ -6,6 +6,7 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 
 public class ForgeCommand extends CommandBase {
 
@@ -26,16 +27,15 @@ public class ForgeCommand extends CommandBase {
     public String getCommandUsage(ICommandSender iCommandSender) {
         return "/" + name;
     }
-
-    @Override
-    public void processCommand(ICommandSender sender, String[] args) throws CommandException {
-        if ((sender instanceof EntityPlayerMP)) {
-            EntityPlayerMP player = (EntityPlayerMP) sender;
-            if (player.worldObj.isRemote) {
-                return;
-            }
-            FawePlayer<Object> fp = FawePlayer.wrap(player);
-            cmd.executeSafe(fp, args);
-        }
-    }
+	@Override
+	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+		 if ((sender instanceof EntityPlayerMP)) {
+	            EntityPlayerMP player = (EntityPlayerMP) sender;
+	            if (player.worldObj.isRemote) {
+	                return;
+	            }
+	            FawePlayer<Object> fp = FawePlayer.wrap(player);
+	            cmd.executeSafe(fp, args);
+	        }
+	}
 }

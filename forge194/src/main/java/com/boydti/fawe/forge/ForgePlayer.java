@@ -9,9 +9,9 @@ import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.forge.ForgeWorldEdit;
 import java.util.UUID;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
 public class ForgePlayer extends FawePlayer<EntityPlayerMP> {
@@ -54,8 +54,8 @@ public class ForgePlayer extends FawePlayer<EntityPlayerMP> {
     public void sendMessage(String msg) {
         for (String part : msg.split("\n")) {
             part = BBC.color(part);
-            ChatComponentText component = new ChatComponentText(part);
-            component.getChatStyle().setColor(EnumChatFormatting.LIGHT_PURPLE);
+            TextComponentString component = new TextComponentString(part);
+            component.getStyle().setColor(TextFormatting.LIGHT_PURPLE);
             this.parent.addChatMessage(component);
         }
     }
@@ -69,7 +69,7 @@ public class ForgePlayer extends FawePlayer<EntityPlayerMP> {
     public FaweLocation getLocation() {
         World world = parent.worldObj;
         BlockPos pos = parent.getPosition();
-        return new FaweLocation(world.provider.getDimensionName(), pos.getX(), pos.getY(), pos.getZ());
+        return new FaweLocation(world.getProviderName(), pos.getX(), pos.getY(), pos.getZ());
     }
 
     @Override

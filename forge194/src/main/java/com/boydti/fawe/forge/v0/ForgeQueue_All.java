@@ -34,22 +34,21 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.play.server.S13PacketDestroyEntities;
-import net.minecraft.network.play.server.S21PacketChunkData;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerManager;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.IntHashMap;
-import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.NibbleArray;
+import net.minecraft.world.chunk.storage.ChunkLoader;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class ForgeQueue_All extends NMSMappedFaweQueue<World, Chunk, ExtendedBlockStorage[], char[]> {
 
@@ -74,7 +73,7 @@ public class ForgeQueue_All extends NMSMappedFaweQueue<World, Chunk, ExtendedBlo
     @Override
     public CompoundTag getTileEntity(Chunk chunk, int x, int y, int z) {
         Map<BlockPos, TileEntity> tiles = chunk.getTileEntityMap();
-        pos.set(x, y, z);
+        pos.setPos(x, y, z);
         TileEntity tile = tiles.get(pos);
         return tile != null ? getTag(tile) : null;
     }
@@ -101,13 +100,13 @@ public class ForgeQueue_All extends NMSMappedFaweQueue<World, Chunk, ExtendedBlo
 
     @Override
     public boolean isChunkLoaded(int x, int z) {
-        return getWorld().getChunkProvider().chunkExists(x, z);
+        return !getWorld().getChunkProvider().getLoadedChunk(x, z).unloaded;
     }
 
     public World getWorld(String world) {
-        WorldServer[] worlds = MinecraftServer.getServer().worldServers;
+        WorldServer[] worlds = FMLCommonHandler.instance().getMinecraftServerInstance().worldServers;
         for (WorldServer ws : worlds) {
-            if (ws.provider.getDimensionName().equals(world)) {
+            if (ws.getProviderName().equals(world)) {
                 return ws;
             }
         }
@@ -121,9 +120,9 @@ public class ForgeQueue_All extends NMSMappedFaweQueue<World, Chunk, ExtendedBlo
             return false;
         }
         ChunkProviderServer chunkServer = (ChunkProviderServer) provider;
-        IChunkProvider chunkProvider = chunkServer.serverChunkGenerator;
+        IChunkProvider chunkProvider = chunkServer;
 
-        long pos = ChunkCoordIntPair.chunkXZ2Int(x, z);
+        long pos = ChunkPos.chunkXZ2Int(x, z);
         Chunk mcChunk;
         if (chunkServer.chunkExists(x, z)) {
             mcChunk = chunkServer.loadChunk(x, z);
@@ -139,8 +138,8 @@ public class ForgeQueue_All extends NMSMappedFaweQueue<World, Chunk, ExtendedBlo
         }
         chunkServer.id2ChunkMap.remove(pos);
         mcChunk = chunkProvider.provideChunk(x, z);
-        chunkServer.id2ChunkMap.add(pos, mcChunk);
-        chunkServer.loadedChunks.add(mcChunk);
+        chunkServer.id2ChunkMap.put(pos, mcChunk);
+        chunkServer.chunkLoader.loadChunk(world, x, z);
         if (mcChunk != null) {
             mcChunk.onChunkLoad();
             mcChunk.populateChunk(chunkProvider, chunkProvider, x, z);
@@ -263,7 +262,7 @@ public class ForgeQueue_All extends NMSMappedFaweQueue<World, Chunk, ExtendedBlo
                         if (isSurrounded(sections, x, y, z)) {
                             continue;
                         }
-                        pos.set(X + x, y, Z + z);
+                        pos.setPos(X + x, y, Z + z);
                         nmsWorld.checkLight(pos);
                     }
                     continue;
@@ -303,7 +302,7 @@ public class ForgeQueue_All extends NMSMappedFaweQueue<World, Chunk, ExtendedBlo
                             if (isSurrounded(sections, x, y, z)) {
                                 continue;
                             }
-                            pos.set(X + x, y, Z + z);
+                            pos.setPos(X + x, y, Z + z);
                             nmsWorld.checkLight(pos);
                     }
                 }

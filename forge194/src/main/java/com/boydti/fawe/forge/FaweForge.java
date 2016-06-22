@@ -24,6 +24,8 @@ import javax.management.InstanceAlreadyExistsException;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+
 import org.apache.logging.log4j.Logger;
 
 public class FaweForge implements IFawe {
@@ -59,7 +61,7 @@ public class FaweForge implements IFawe {
             TaskManager.IMP.task(new Runnable() {
                 @Override
                 public void run() {
-                    ServerCommandManager scm = (ServerCommandManager) MinecraftServer.getServer().getCommandManager();
+                    ServerCommandManager scm = (ServerCommandManager) FMLCommonHandler.instance().getMinecraftServerInstance().getCommandManager();
                     scm.registerCommand(new ForgeCommand(label, cmd));
                 }
             });
@@ -70,11 +72,11 @@ public class FaweForge implements IFawe {
     public FawePlayer wrap(Object obj) {
         EntityPlayerMP player = null;
         if (obj instanceof String) {
-            MinecraftServer server = MinecraftServer.getServer();
-            player = server.getConfigurationManager().getPlayerByUsername((String) obj);
+            MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+            player = server.getPlayerList().getPlayerByUsername((String) obj);
         } else if (obj instanceof UUID) {
-            MinecraftServer server = MinecraftServer.getServer();
-            player = server.getConfigurationManager().getPlayerByUUID((UUID) obj);
+        	MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+            player = server.getPlayerList().getPlayerByUUID((UUID) obj);
         } else if (obj instanceof EntityPlayerMP) {
             player = (EntityPlayerMP) obj;
         }
@@ -97,7 +99,7 @@ public class FaweForge implements IFawe {
 
     @Override
     public int[] getVersion() {
-        String[] version = MinecraftServer.getServer().getMinecraftVersion().split("\\.");
+        String[] version = FMLCommonHandler.instance().getMinecraftServerInstance().getMinecraftVersion().split("\\.");
         return new int[] {Integer.parseInt(version[0]), Integer.parseInt(version[1]), Integer.parseInt(version[2])};
     }
 
@@ -106,7 +108,7 @@ public class FaweForge implements IFawe {
         if (world instanceof WorldWrapper) {
             world = ((WorldWrapper) world).getParent();
         }
-        return ((ForgeWorld) world).getWorld().provider.getDimensionName();
+        return ((ForgeWorld) world).getWorld().provider.getDimensionType().getName();
     }
 
     @Override
@@ -143,7 +145,7 @@ public class FaweForge implements IFawe {
     @Override
     public UUID getUUID(String name) {
         try {
-            GameProfile profile = MinecraftServer.getServer().getPlayerProfileCache().getGameProfileForUsername(name);
+            GameProfile profile = FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerProfileCache().getGameProfileForUsername(name);
             return profile.getId();
         } catch (Throwable e) {
             return null;
@@ -153,7 +155,7 @@ public class FaweForge implements IFawe {
     @Override
     public String getName(UUID uuid) {
         try {
-            GameProfile profile = MinecraftServer.getServer().getPlayerProfileCache().getProfileByUUID(uuid);
+            GameProfile profile = FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerProfileCache().getProfileByUUID(uuid);
             return profile.getName();
         } catch (Throwable e) {
             return null;

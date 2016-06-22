@@ -247,15 +247,15 @@ public class ForgeMetrics {
     private void postPlugin(final boolean isPing) throws IOException {
         // Server software specific section
         String pluginName = modName;
-        boolean onlineMode = MinecraftServer.getServer().isServerInOnlineMode();
+        boolean onlineMode = FMLCommonHandler.instance().getMinecraftServerInstance().isServerInOnlineMode();
         String pluginVersion = modVersion;
         String serverVersion;
-        if (MinecraftServer.getServer().isDedicatedServer()) {
-            serverVersion = "MinecraftForge (MC: " + MinecraftServer.getServer().getMinecraftVersion() + ")";
+        if (FMLCommonHandler.instance().getMinecraftServerInstance().isDedicatedServer()) {
+            serverVersion = "MinecraftForge (MC: " + FMLCommonHandler.instance().getMinecraftServerInstance().getMinecraftVersion() + ")";
         } else {
-            serverVersion = "MinecraftForgeSSP (MC: " + MinecraftServer.getServer().getMinecraftVersion() + ")";
+            serverVersion = "MinecraftForgeSSP (MC: " + FMLCommonHandler.instance().getMinecraftServerInstance().getMinecraftVersion() + ")";
         }
-        int playersOnline = MinecraftServer.getServer().getCurrentPlayerCount();
+        int playersOnline = FMLCommonHandler.instance().getMinecraftServerInstance().getCurrentPlayerCount();
 
         // END server software specific section -- all code below does not use any code outside of this class / Java
 

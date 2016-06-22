@@ -43,7 +43,7 @@ public class ForgeMain {
 
     @Mod.EventHandler
     public void serverStopping(FMLServerStoppingEvent event) {
-        for (EntityPlayerMP player : (List<EntityPlayerMP>)MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
+        for (EntityPlayerMP player : (List<EntityPlayerMP>)FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList()) {
             handleQuit(player);
         }
     }
@@ -56,7 +56,7 @@ public class ForgeMain {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onPlayerChangedWorld(EntityJoinWorldEvent event) {
-        Entity entity = event.entity;
+        Entity entity = event.getEntity();
         if (!(entity instanceof EntityPlayerMP)) {
             return;
         }
@@ -65,9 +65,9 @@ public class ForgeMain {
             return;
         }
         FawePlayer fp = FawePlayer.wrap(player);
-        if (fp.getMeta("lastWorld") != event.world) {
-            fp.setMeta("lastWorld", event.world);
-            if (Settings.STORE_HISTORY_ON_DISK) {
+        if (fp.getMeta("lastWorld") != event.getWorld()) {
+            fp.setMeta("lastWorld", event.getWorld());
+            if (Settings.HISTORY.USE_DISK) {
                 fp.getSession().clearHistory();
                 fp.loadSessionsFromDisk(fp.getWorld());
             }
